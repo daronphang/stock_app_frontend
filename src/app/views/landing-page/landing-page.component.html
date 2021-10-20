@@ -1,0 +1,53 @@
+<div class="background-lp">
+  <div *ngIf="portfolioService.errorMsgs$ | async">
+    <div *ngFor="let msg of portfolioService.errorMsgs$ | async">
+      <app-alerts [msg]="msg"></app-alerts>
+    </div>
+  </div>
+  <div class="break"></div>
+  <app-search [originalArr]="stockSearchList" (results)="onSearchHandler($event)"></app-search>
+  <div class="break"></div>
+
+  <div *ngIf="onSearch" class="stock-table-container">
+    <mat-spinner *ngIf="isLoading" [diameter]="70" class="spinner"></mat-spinner>
+
+    <ag-grid-angular
+      *ngIf="!isLoading"
+      #agGrid
+      class="ag-theme-alpine custom-table"
+      domLayout="autoHeight"
+      [rowData]="portfolioTable$ | async"
+      [defaultColDef]="defaultColDef"
+      [columnDefs]="columnDefs"
+      rowSelection="multiple"
+      (gridReady)="onGridReady($event)"
+    ></ag-grid-angular>
+  </div>
+
+  <div *ngIf="!onSearch">
+    <div class="action-buttons">
+      <button mat-button (click)="accordion.openAll()">Expand All</button>
+      <button mat-button (click)="accordion.closeAll()">Collapse All</button>
+      <div class="flex-spacer"></div>
+      <button mat-button (click)="onCreatePortfolioHandler()">
+        Create Portfolio
+        <i class="fas fa-plus-circle"></i>
+      </button>
+    </div>
+
+    <mat-spinner *ngIf="isLoading" [diameter]="70" class="spinner"></mat-spinner>
+
+    <div class="stock-table-container" *ngIf="!isLoading">
+      <mat-accordion hideToggle="false" multi>
+        <div *ngFor="let item of userPortfolio$ | async">
+          <mat-expansion-panel expanded="true">
+            <mat-expansion-panel-header>
+              <mat-panel-title style="font-weight: bold"> {{ item.title }} </mat-panel-title>
+            </mat-expansion-panel-header>
+            <app-portfolio [meta]="item"></app-portfolio>
+          </mat-expansion-panel>
+        </div>
+      </mat-accordion>
+    </div>
+  </div>
+</div>

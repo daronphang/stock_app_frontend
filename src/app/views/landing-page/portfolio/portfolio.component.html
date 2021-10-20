@@ -1,0 +1,54 @@
+<ng-template #addSearch>
+  <app-popover (addedItems)="onAddHandler($event)"></app-popover>
+</ng-template>
+
+<div class="actions" *ngIf="!(onEdit || onAdd)">
+  <div>Timestamp: {{ timestamp }}</div>
+  <div class="flex-spacer"></div>
+  <button mat-button placement="bottom" autoClose="outside" [ngbPopover]="addSearch">
+    Add
+    <i class="fas fa-plus-circle"></i>
+  </button>
+  <button mat-button (click)="onEditHandler()">
+    Edit
+    <i class="fas fa-edit"></i>
+  </button>
+  <button mat-button (click)="onRefreshHandler()">
+    Refresh
+    <i class="fas fa-sync-alt"></i>
+  </button>
+</div>
+
+<mat-spinner *ngIf="isLoading" [diameter]="70" class="spinner"></mat-spinner>
+<!-- <div style="color: white" *ngIf="!stockTableService.isLoading">
+  Your search returned zero results.
+</div> -->
+
+<div *ngIf="!isLoading">
+  <ag-grid-angular
+    #agGrid
+    class="ag-theme-balham"
+    style="width: 100%"
+    domLayout="autoHeight"
+    [rowData]="portfolioTable$ | async"
+    [defaultColDef]="defaultColDef"
+    [columnDefs]="onEdit ? editColumnDefs : columnDefs"
+    rowSelection="multiple"
+    (gridReady)="onGridReady($event)"
+  ></ag-grid-angular>
+  <div class="break-sm"></div>
+  <div *ngIf="onEdit">
+    <button mat-button (click)="onSaveHandler()">
+      Save
+      <i class="fas fa-check-circle" style="color: green"></i>
+    </button>
+    <button mat-button (click)="onCancelHandler()">
+      Cancel
+      <i class="fas fa-times-circle" style="color: red"></i>
+    </button>
+    <button mat-button (click)="onDeletePortfolioHandler()">
+      Delete
+      <i class="fas fa-trash-alt"></i>
+    </button>
+  </div>
+</div>

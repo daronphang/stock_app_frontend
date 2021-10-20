@@ -1,0 +1,28 @@
+<div class="popover">
+  <app-search
+    [showIcon]="false"
+    (results)="onSearchHandler($event)"
+    searchClass="search popover"
+  ></app-search>
+
+  <div style="height: 4em"></div>
+  <div *ngIf="isLoading" style="width: 17em; padding-left: 10px">
+    <mat-spinner [diameter]="70" class="spinner"></mat-spinner>
+  </div>
+
+  <ag-grid-angular
+    #agGrid
+    *ngIf="!isLoading"
+    class="ag-theme-balham"
+    style="width: 20em; max-height: 12em; overflow: scroll"
+    domLayout="autoHeight"
+    [rowData]="displayResults$ | async"
+    [columnDefs]="columnDefs"
+    rowSelection="multiple"
+    (gridReady)="onGridReady($event)"
+  ></ag-grid-angular>
+  <button mat-button class="add" (click)="onAddHandler()">
+    Add
+    <i class="fas fa-plus"></i>
+  </button>
+</div>

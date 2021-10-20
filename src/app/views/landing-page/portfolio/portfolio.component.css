@@ -1,0 +1,16 @@
+.actions {
+  display: flex;
+  color: white;
+  padding-left: 15px;
+  align-items: center;
+  height: 5em;
+}
+
+.add-title {
+  background: #1a1b1c;
+  color: white;
+}
+
+.popover-table {
+  margin: auto;
+}

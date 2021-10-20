@@ -1,0 +1,7 @@
+<div [ngClass]="searchClass">
+  <button mat-icon-button *ngIf="showIcon"><mat-icon>search</mat-icon></button>
+  <mat-form-field style="width: 85%">
+    <mat-label>Search</mat-label>
+    <input #searchBox placeholder="Search anything..." [(ngModel)]="inputValue" matInput />
+  </mat-form-field>
+</div>

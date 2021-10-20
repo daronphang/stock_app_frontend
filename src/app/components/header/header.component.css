@@ -1,0 +1,13 @@
+.nav-container {
+  background: #1a1b1c;
+  width: 100%;
+}
+.toolbar {
+  width: 50em;
+  background: #1a1b1c;
+  padding: 10px 0 20px 0;
+  height: auto;
+  margin: 0 auto 0 auto;
+  color: white;
+  border-bottom: 0.1px solid white;
+}

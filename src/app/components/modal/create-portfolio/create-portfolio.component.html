@@ -1,0 +1,33 @@
+<div class="container">
+  <app-search (results)="onSearchHandler($event)"></app-search>
+  <div style="margin-top: 2em"></div>
+
+  <div *ngIf="isLoading">
+    <mat-spinner [diameter]="70" class="spinner"></mat-spinner>
+  </div>
+
+  <ag-grid-angular
+    #agGrid
+    *ngIf="!isLoading"
+    class="ag-theme-balham"
+    style="width: 100%; height: 10em"
+    domLayout="autoHeight"
+    [rowData]="displayResults$ | async"
+    [columnDefs]="columnDefs"
+    rowSelection="multiple"
+    (gridReady)="onGridReady($event)"
+  ></ag-grid-angular>
+  <div>
+    <button mat-button (click)="onSelectHandler('add')">
+      Add
+      <i class="fas fa-plus"></i>
+    </button>
+    <button mat-button (click)="onSelectHandler('remove')">
+      Remove
+      <i class="fas fa-trash-alt"></i>
+    </button>
+  </div>
+  <div style="margin-top: 2em" *ngIf="!((selectedTickers$ | async)?.length === 0)">
+    Selected Stocks: {{ selectedTickers$ | async }}
+  </div>
+</div>

@@ -1,0 +1,7 @@
+<div [ngClass]="alertClass" [ngStyle]="{ 'animation-delay': delay }" *ngIf="!hide">
+  <div>{{ msg }}</div>
+  <div class="flex-spacer"></div>
+  <button mat-icon-button (click)="onCloseHandler()">
+    <i class="fas fa-times-circle" style="font-size: 20px"></i>
+  </button>
+</div>

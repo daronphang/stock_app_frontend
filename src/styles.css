@@ -1,0 +1,69 @@
+@import '../node_modules/ag-grid-community/dist/styles/ag-grid.css';
+@import '../node_modules/ag-grid-community/dist/styles/ag-theme-alpine.css';
+@import '../node_modules/ag-grid-community/dist/styles/ag-theme-balham.css';
+/* @import './custom-theme.scss'; */
+
+@font-face {
+  font-family: JetBrainsMono;
+  src: url(assets/fonts/JetBrainsMono-Regular.ttf) format('truetype');
+}
+
+html,
+body,
+header {
+  height: 100%;
+  margin: 0;
+  /* for removing whitespace around  */
+}
+
+* {
+  font-family: JetBrainsMono, 'Helvetica Neue', sans-serif;
+}
+
+/* styles for buttons */
+.custom-button {
+  cursor: pointer;
+  height: 1.5em;
+}
+
+.custom-button:hover::after {
+  display: block;
+  content: '';
+  animation-name: customButton;
+  animation-duration: 0.5s;
+  border-bottom: 2px solid white;
+  transform-origin: 0%;
+}
+
+@keyframes customButton {
+  0% {
+    transform: scaleX(0);
+    border-bottom: 0px;
+  }
+  100% {
+    transform: scaleX(1);
+    border-bottom: 2px solid white;
+  }
+}
+
+/* styles for breaks */
+.flex-spacer {
+  flex: 1 1 auto;
+}
+
+.break {
+  height: 5em;
+}
+
+.break-sm {
+  height: 3em;
+}
+
+.spinner {
+  margin: 2em auto 2em auto;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+}

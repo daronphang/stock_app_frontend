@@ -1,0 +1,21 @@
+.alert-default {
+  display: flex;
+  align-items: center;
+  min-width: 60em;
+  max-width: 100em;
+  border-radius: 5px;
+  padding-left: 10px;
+  margin-bottom: 10px;
+  background: #fdca64;
+  animation-name: fade;
+  animation-duration: 1s;
+}
+
+@keyframes fade {
+  0% {
+    opacity: 100;
+  }
+  100% {
+    opacity: 0;
+  }
+}

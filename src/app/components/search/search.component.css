@@ -1,0 +1,20 @@
+.search {
+  margin: auto;
+  color: white;
+  border: 1px solid white;
+  border-radius: 10px;
+  width: 30em;
+  height: 5em;
+  display: flex;
+  align-items: center;
+}
+
+.popover {
+  background: #1a1b1c;
+  border-radius: 5px;
+  width: 17em;
+  margin-left: 12px;
+  padding-left: 25px;
+  margin-top: 15px;
+  height: 2.5em;
+}
