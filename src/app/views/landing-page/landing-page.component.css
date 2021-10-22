@@ -1,14 +1,9 @@
-.background-lp {
-  background: #1a1b1c;
-  height: 100vh;
-  padding: 20px;
-}
-
 .stock-table-container {
   margin: 0em auto 5em auto;
   min-width: 60em;
   max-width: 100em;
   border: 1px solid white;
+  max-height: 40em;
 }
 
 .action-buttons {

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { PortfolioTable } from 'src/app/interfaces/portfolio';
 import { catchError, concatMap, map, take, tap } from 'rxjs/operators';
-import { BehaviorSubject, forkJoin, from, of, throwError } from 'rxjs';
+import { BehaviorSubject, forkJoin, from, Observable, of, throwError } from 'rxjs';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 
 @Injectable({
@@ -60,6 +60,14 @@ export class PortfolioService {
     return throwError(errorMsg);
   }
 
+  // // Delay 1s sending fetch request for each chunk of 5 tickers
+  // async delayFetch(chunk: string[], i: number) {
+  //   await new Promise((resolve) => setTimeout(resolve, i * 1500));
+  //   const chunk$ = chunk.map((ticker) => this.fetchData(ticker));
+  //   // Async function can only return a Promise, not Observable
+  //   return forkJoin(chunk$).toPromise();
+  // }
+
   fetchDataArr(tickerList: string[]) {
     // Maximum of 5 variables in array
     const chunkArr: string[][] = [];
@@ -67,7 +75,14 @@ export class PortfolioService {
       const chunk = tickerList.slice(i, i + 5);
       chunkArr.push(chunk);
     }
-    const test$ = from(chunkArr).pipe(
+
+    // const results$ = chunkArr.map((chunk, i) => {
+    //   return from(this.delayFetch(chunk, i));
+    // });
+
+    // return forkJoin(results$);
+
+    const results$ = from(chunkArr).pipe(
       concatMap((chunk) => {
         const chunkObs$ = chunk.map((ticker) => {
           return this.fetchData(ticker);
@@ -75,7 +90,7 @@ export class PortfolioService {
         return forkJoin(chunkObs$);
       })
     );
-    return test$;
+    return results$;
   }
 
   mapData(item: any) {

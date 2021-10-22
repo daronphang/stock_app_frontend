@@ -1,4 +1,13 @@
 <div class="container">
+  <form [formGroup]="form">
+    <mat-form-field appearance="fill" style="width: 100%">
+      <mat-label>Title</mat-label>
+      <input matInput type="text" placeholder="Enter Portfolio Title" formControlName="title" />
+    </mat-form-field>
+    <mat-error *ngIf="getFormError('title')">Please enter a title.</mat-error>
+  </form>
+
+  <div style="margin-top: 2em"></div>
   <app-search (results)="onSearchHandler($event)"></app-search>
   <div style="margin-top: 2em"></div>
 

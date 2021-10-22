@@ -19,10 +19,11 @@ export interface PortfolioTable {
 }
 
 export interface PortfolioMeta {
-  [key: string]: string | number | string[];
+  [key: string]: string | number | string[] | boolean;
   title: string;
   tickers: string[];
-  delayMultiplier: number;
+  // delayMultiplier: number;
+  // storage: boolean;
 }
 
 export interface StockSearch {

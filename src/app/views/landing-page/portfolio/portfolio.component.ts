@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { AgGridAngular } from 'ag-grid-angular';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { take } from 'rxjs/operators';
+import { take, takeUntil } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
 
 import { ModalComponent } from 'src/app/components/modal/modal.component';
@@ -11,6 +11,7 @@ import { PortfolioService } from './portfolio.service';
 import { LandingPageService } from '../landing-page.service';
 import { PortfolioMeta } from 'src/app/interfaces/portfolio';
 import { storageHandler } from 'src/app/helpers/storage';
+import { BehaviorSubject, EMPTY, NEVER, Observable, of, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-portfolio',
@@ -20,9 +21,12 @@ import { storageHandler } from 'src/app/helpers/storage';
 export class PortfolioComponent extends PortfolioSource implements OnInit {
   @ViewChild('agGrid') agGrid: AgGridAngular;
   @Input('meta') meta: PortfolioMeta;
-
+  @Input('dataSource') dataSource$ = new BehaviorSubject<any[]>([]);
   onEdit: boolean = false;
   onAdd: boolean = false;
+
+  // Observable to manually complete dataSource$ in takeUntil()
+  notifier$ = new Subject();
 
   constructor(
     public portfolioService: PortfolioService,
@@ -36,6 +40,7 @@ export class PortfolioComponent extends PortfolioSource implements OnInit {
   ngOnInit(): void {
     // Check if portfolio data exists in local storage, else fetch from API
     this.isLoading = true;
+
     storageHandler('LOCAL', this.meta.title).subscribe(
       (storedData) => {
         const { timestamp, data } = JSON.parse(storedData);
@@ -44,10 +49,33 @@ export class PortfolioComponent extends PortfolioSource implements OnInit {
         this.isLoading = false;
       },
       (err) => {
-        setTimeout(() => {
-          const resultObs$ = this.portfolioService.fetchDataArr(this.meta.tickers);
-          this.displayPortfolioTable(resultObs$, true, this.meta.title);
-        }, this.meta.delayMultiplier * 1500);
+        const finalData: any[] = [];
+        this.dataSource$.pipe(takeUntil(this.notifier$)).subscribe(
+          (data) => {
+            if (data[0] === 'completed') this.notifier$.next(true);
+
+            const cleanData = data.filter((item) => item);
+            cleanData.forEach((stock) => {
+              if (this.meta.tickers.includes(stock.symbol)) {
+                const mappedData = this.portfolioService.mapData(stock);
+                finalData.push(mappedData);
+              }
+            });
+            if (finalData.length === this.meta.tickers.length) {
+              this.notifier$.next(true);
+            }
+          },
+          (err) => {
+            this.isLoading = false;
+          },
+          () => {
+            this.onFinalize(finalData, true, this.meta.title);
+          }
+        );
+        // setTimeout(() => {
+        //   const resultObs$ = this.portfolioService.fetchDataArr(this.meta.tickers);
+        //   this.displayPortfolioTable(resultObs$, true, this.meta.title);
+        // }, this.meta.delayMultiplier * 1000);
       }
     );
   }
@@ -110,7 +138,9 @@ export class PortfolioComponent extends PortfolioSource implements OnInit {
         this.meta.title,
         JSON.stringify({ timestamp: new Date(), data: updatedData })
       );
-      this._snackBar.open('Portfolio successfully updated!', 'Close', { duration: 3000 });
+      this._snackBar.open('Portfolio successfully updated!', 'Close', {
+        duration: 3000,
+      });
     });
   }
 

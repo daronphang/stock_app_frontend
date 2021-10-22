@@ -5,10 +5,12 @@
   max-width: 100em;
   border-radius: 5px;
   padding-left: 10px;
+  margin-top: 20px;
   margin-bottom: 10px;
   background: #fdca64;
   animation-name: fade;
   animation-duration: 1s;
+  color: black;
 }
 
 @keyframes fade {

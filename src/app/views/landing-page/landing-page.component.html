@@ -1,4 +1,4 @@
-<div class="background-lp">
+<div>
   <div *ngIf="portfolioService.errorMsgs$ | async">
     <div *ngFor="let msg of portfolioService.errorMsgs$ | async">
       <app-alerts [msg]="msg"></app-alerts>
@@ -44,10 +44,11 @@
             <mat-expansion-panel-header>
               <mat-panel-title style="font-weight: bold"> {{ item.title }} </mat-panel-title>
             </mat-expansion-panel-header>
-            <app-portfolio [meta]="item"></app-portfolio>
+            <app-portfolio [meta]="item" [dataSource]="dataSource"></app-portfolio>
           </mat-expansion-panel>
         </div>
       </mat-accordion>
     </div>
+    <div style="margin-top: 5em"></div>
   </div>
 </div>

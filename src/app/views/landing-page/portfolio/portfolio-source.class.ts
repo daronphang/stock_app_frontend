@@ -3,6 +3,7 @@ import { AgGridEvent, ColDef } from 'ag-grid-community';
 
 import { PortfolioTable } from 'src/app/interfaces/portfolio';
 import { PortfolioService } from './portfolio.service';
+import { take } from 'rxjs/operators';
 
 export class PortfolioSource {
   portfolioTable$ = new BehaviorSubject<PortfolioTable[]>([]);
@@ -44,11 +45,19 @@ export class PortfolioSource {
     params.columnApi.autoSizeAllColumns();
   }
 
+  onFinalize(finalData: any[], isStore: boolean, key: string) {
+    this.isLoading = false;
+    this.portfolioTable$.next(finalData);
+    this.timestamp = new Date(new Date());
+    if (isStore)
+      localStorage.setItem(key, JSON.stringify({ timestamp: new Date(), data: finalData }));
+  }
+
   displayPortfolioTable(resultObs$: Observable<any[]>, isStore: boolean = false, key: string = '') {
     const finalData: PortfolioTable[] = [];
     this.isLoading = true;
 
-    resultObs$.subscribe(
+    resultObs$.pipe(take(1)).subscribe(
       (data: any[]) => {
         const cleanData = data.filter((item) => item);
         cleanData.forEach((item) => {
@@ -61,11 +70,7 @@ export class PortfolioSource {
         this.isLoading = false;
       },
       () => {
-        this.isLoading = false;
-        this.portfolioTable$.next(finalData);
-        this.timestamp = new Date(new Date());
-        if (isStore)
-          localStorage.setItem(key, JSON.stringify({ timestamp: new Date(), data: finalData }));
+        this.onFinalize(finalData, isStore, key);
       }
     );
   }

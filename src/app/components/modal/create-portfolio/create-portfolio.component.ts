@@ -1,4 +1,5 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { FormBuilder, Validators } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { PortfolioMeta } from 'src/app/interfaces/portfolio';
@@ -15,11 +16,20 @@ export class CreatePortfolioComponent extends PopoverComponent implements OnInit
   @Output() selectedStocks = new EventEmitter<PortfolioMeta>();
   selectedTickers$ = new BehaviorSubject<string[]>([]);
 
-  constructor(public portfolioService: PortfolioService) {
+  form = this.fb.group({
+    title: ['', [Validators.required]],
+  });
+
+  constructor(public portfolioService: PortfolioService, private fb: FormBuilder) {
     super(portfolioService);
   }
 
   ngOnInit(): void {}
+
+  getFormError(fc: string) {
+    if (this.form.controls[fc].invalid && this.form.controls[fc].touched) return true;
+    else return false;
+  }
 
   // Sets only store unique values and hence, do not need to check for existing
   setHandler(action: string, selectedArr: string[], updateArr: string[]) {
@@ -41,9 +51,8 @@ export class CreatePortfolioComponent extends PopoverComponent implements OnInit
       this.selectedTickers$.next(updatedTickers);
 
       this.selectedStocks.emit({
-        title: 'New Portfolio',
+        title: this.form.controls['title'].value,
         tickers: updatedTickers,
-        delayMultiplier: 0,
       });
     });
   }
