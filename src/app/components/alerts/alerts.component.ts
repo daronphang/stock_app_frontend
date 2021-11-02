@@ -1,4 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { take } from 'rxjs/operators';
+import { PortfolioService } from 'src/app/views/landing-page/portfolio/portfolio.service';
 
 @Component({
   selector: 'app-alerts',
@@ -12,12 +14,16 @@ export class AlertsComponent implements OnInit {
   @Input('delay') delay: string = '4s';
   hide: boolean = false;
 
-  constructor() {}
+  constructor(private portfolioService: PortfolioService) {}
 
   ngOnInit(): void {
     if (this.timeout) {
       setTimeout(() => {
         this.hide = true;
+        this.portfolioService.errorMsgs$.pipe(take(1)).subscribe((errMsgs) => {
+          errMsgs.splice(0, 1);
+          this.portfolioService.errorMsgs$.next(errMsgs);
+        });
       }, 5000);
     }
   }

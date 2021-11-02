@@ -28,6 +28,8 @@ header {
 .custom-button {
   cursor: pointer;
   height: 1.5em;
+  color: white;
+  text-decoration: none;
 }
 
 .custom-button:hover::after {
@@ -74,4 +76,10 @@ header {
 
 .mat-simple-snackbar {
   padding: 20px;
+}
+
+/* CSS styles for ag-grid */
+.delete-header {
+  background-color: #f96f6f;
+  color: #ffffff;
 }

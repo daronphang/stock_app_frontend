@@ -33,8 +33,12 @@
     [rowData]="portfolioTable$ | async"
     [defaultColDef]="defaultColDef"
     [columnDefs]="onEdit ? editColumnDefs : columnDefs"
+    [rowDragManaged]="true"
+    [rowDragEntireRow]="true"
+    [rowDragMultiRow]="true"
     rowSelection="multiple"
     (gridReady)="onGridReady($event)"
+    (firstDataRendered)="onFirstDataRendered($event)"
   ></ag-grid-angular>
   <div class="break-sm"></div>
   <div *ngIf="onEdit">
@@ -42,12 +46,12 @@
       Save
       <i class="fas fa-check-circle" style="color: green"></i>
     </button>
-    <button mat-button (click)="onCancelHandler()">
+    <button mat-button (click)="onCancelHandler()" keyPress (keyValue)="onKeyPressEvent($event)">
       Cancel
       <i class="fas fa-times-circle" style="color: red"></i>
     </button>
     <button mat-button (click)="onDeletePortfolioHandler()">
-      Delete
+      Delete Portfolio
       <i class="fas fa-trash-alt"></i>
     </button>
   </div>

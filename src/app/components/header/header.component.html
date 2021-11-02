@@ -3,9 +3,26 @@
     <button mat-icon-button class="example-icon">
       <mat-icon>menu</mat-icon>
     </button>
-    <div class="custom-button">Daron's Stock Screener</div>
+    <a id="landing-page" routerLink="/lp" routerLinkActive="activeRouterClass" class="custom-button"
+      >Daron's Stock Screener</a
+    >
+    <a
+      id="earnings"
+      routerLink="/earnings"
+      routerLinkActive="activeRouterClass"
+      class="custom-button"
+      style="margin-left: 15px"
+      >Earnings</a
+    >
     <span class="flex-spacer"></span>
-    <div class="custom-button" style="margin-right: 15px">Login</div>
+    <a
+      id="auth"
+      routerLink="/login"
+      routerLinkActive="activeRouterClass"
+      class="custom-button"
+      style="margin-right: 15px"
+      >Login</a
+    >
     <div class="custom-button">Signup</div>
   </mat-toolbar>
 </div>

@@ -18,7 +18,6 @@ export class PopoverComponent extends PortfolioSource implements OnInit {
   @Output() addedItems = new EventEmitter<any[]>();
   results$ = new BehaviorSubject<any[]>([]);
   displayResults$ = new BehaviorSubject<PopoverSearch[]>([]);
-  input$ = new BehaviorSubject<string[]>([]);
 
   columnDefs: ColDef[] = [
     { headerName: 'Ticker', field: 'ticker', checkboxSelection: true, width: 100, resizable: true },
@@ -32,42 +31,39 @@ export class PopoverComponent extends PortfolioSource implements OnInit {
   ngOnInit(): void {}
 
   onSearchHandler(event: SearchEvent) {
-    this.input$.next([event.input]);
+    // To trigger onSearch and isLoading only
+    if (event.input === 'SEARCHING') {
+      this.isLoading = true;
+      return;
+    }
 
+    // If user clears search
     if (event.input === '') {
+      this.isLoading = false;
       return this.displayResults$.next([]);
     }
 
-    const finalData: PopoverSearch[] = [];
-    this.input$
-      .pipe(
-        switchMap((ticker) => {
-          this.isLoading = true;
-          return this.portfolioService.fetchDataArr(ticker);
-        }),
-        take(1) // to change if input is an array
-      )
-      .subscribe(
-        (data: any[]) => {
-          const cleanData = data.filter((item) => item);
-          this.results$.next(data);
-          cleanData.forEach((item) => {
-            const stockData = {
-              ticker: item.symbol,
-              name: item.quoteType.shortName,
-            };
-            finalData.push(stockData);
-          });
-        },
-        (err) => {
-          console.error(err);
-          this.isLoading = false;
-        },
-        () => {
-          this.isLoading = false;
-          this.displayResults$.next(finalData);
-        }
-      );
+    if (event.results.length > 0) {
+      const finalData: PopoverSearch[] = [];
+      const cleanData = event.results.filter((item) => item);
+
+      this.results$.next(cleanData);
+
+      cleanData.forEach((item) => {
+        const stockData = {
+          ticker: item.symbol,
+          name: item.quoteType.shortName,
+        };
+        finalData.push(stockData);
+      });
+      this.displayResults$.next(finalData);
+      this.isLoading = false;
+      return;
+    }
+
+    // If search returned no results
+    this.isLoading = false;
+    this.displayResults$.next(event.results);
   }
 
   onAddHandler() {

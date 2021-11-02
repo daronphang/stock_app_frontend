@@ -1,5 +1,12 @@
 import { BehaviorSubject, Observable } from 'rxjs';
-import { AgGridEvent, ColDef } from 'ag-grid-community';
+import {
+  AgGridEvent,
+  ColDef,
+  ColumnApi,
+  FirstDataRenderedEvent,
+  GridApi,
+  GridReadyEvent,
+} from 'ag-grid-community';
 
 import { PortfolioTable } from 'src/app/interfaces/portfolio';
 import { PortfolioService } from './portfolio.service';
@@ -9,6 +16,8 @@ export class PortfolioSource {
   portfolioTable$ = new BehaviorSubject<PortfolioTable[]>([]);
   isLoading: boolean = false;
   timestamp = new Date();
+  gridApi: GridApi;
+  columnApi: ColumnApi;
 
   defaultColDef = {
     resizable: true,
@@ -16,33 +25,51 @@ export class PortfolioSource {
   };
 
   columnDefs: ColDef[] = [
-    { headerName: 'Ticker', field: 'ticker' },
+    { headerName: 'Ticker', field: 'ticker', pinned: 'left' },
+    { headerName: 'Earnings', field: 'earningsDate' },
     { headerName: 'Price', field: 'price' },
     { headerName: 'Beta', field: 'beta' },
     { headerName: 'Market Cap.', field: 'marketCap' },
+    { headerName: 'EV', field: 'ev' },
     { headerName: 'Shares Outs.', field: 'sharesOut' },
     { headerName: 'EV/EBIDTA', field: 'evToEbidta' },
     { headerName: 'EV/Rev', field: 'evToRev' },
     { headerName: 'P/E (F)', field: 'forwardPE' },
-    { headerName: 'Price/Book', field: 'priceBook' },
+    { headerName: 'P/B', field: 'priceBook' },
     { headerName: 'EPS (F)', field: 'forwardEps' },
     { headerName: 'PEG Ratio', field: 'pegRatio' },
-    { headerName: 'Short Ratio', field: 'shortRatio', width: 140 },
-    { headerName: 'FCF', field: 'fcf', width: 100 },
-    { headerName: 'ROE', field: 'roe', width: 100 },
-    { headerName: 'CR', field: 'currentRatio', width: 80 },
-    { headerName: 'Debt/Equity', field: 'debtToEquity', width: 140 },
+    { headerName: 'Short Ratio', field: 'shortRatio' },
+    { headerName: 'FCF', field: 'fcf' },
+    { headerName: 'ROE', field: 'roe' },
+    { headerName: 'CR', field: 'currentRatio' },
+    { headerName: 'Debt/Equity', field: 'debtToEquity' },
   ];
 
   editColumnDefs: ColDef[] = [
-    { headerName: 'Del', checkboxSelection: true, rowDrag: true, width: 80 },
+    {
+      headerName: 'Delete',
+      checkboxSelection: true,
+      width: 80,
+      headerClass: 'delete-header',
+    },
     ...this.columnDefs,
   ];
 
   constructor(public portfolioService: PortfolioService) {}
 
-  onGridReady(params: AgGridEvent) {
-    params.columnApi.autoSizeAllColumns();
+  // To autosize columns not visible in DOM, need call both GridReady and FirstDataRendered
+  // GridReady to fit all columns on DOM first
+  // FirstDataRendered to autosize all columns
+  onGridReady(params: GridReadyEvent) {
+    params.api.sizeColumnsToFit();
+  }
+
+  onFirstDataRendered(params: FirstDataRenderedEvent) {
+    this.gridApi = params.api;
+    this.columnApi = params.columnApi;
+    const allColIds: string[] = [];
+    params.columnApi.getAllColumns()?.forEach((column) => allColIds.push(column.getColId()));
+    params.columnApi.autoSizeColumns(allColIds);
   }
 
   onFinalize(finalData: any[], isStore: boolean, key: string) {
@@ -60,6 +87,7 @@ export class PortfolioSource {
     resultObs$.pipe(take(1)).subscribe(
       (data: any[]) => {
         const cleanData = data.filter((item) => item);
+        console.log(cleanData);
         cleanData.forEach((item) => {
           const stockData = this.portfolioService.mapData(item);
           finalData.push(stockData);

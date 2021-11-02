@@ -9,9 +9,9 @@ import { ModalComponent } from 'src/app/components/modal/modal.component';
 import { PortfolioSource } from './portfolio-source.class';
 import { PortfolioService } from './portfolio.service';
 import { LandingPageService } from '../landing-page.service';
-import { PortfolioMeta } from 'src/app/interfaces/portfolio';
+import { PortfolioMeta, PortfolioTable } from 'src/app/interfaces/portfolio';
 import { storageHandler } from 'src/app/helpers/storage';
-import { BehaviorSubject, EMPTY, NEVER, Observable, of, Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-portfolio',
@@ -106,6 +106,7 @@ export class PortfolioComponent extends PortfolioSource implements OnInit {
 
       // Add new items to existing table
       const updatedData = [...prevData, ...addedItems];
+      localStorage.removeItem(this.meta.title);
       localStorage.setItem(
         this.meta.title,
         JSON.stringify({ timestamp: new Date(), data: updatedData })
@@ -125,22 +126,21 @@ export class PortfolioComponent extends PortfolioSource implements OnInit {
     const selectedData = selectedNodes.map((node) => node.data);
     console.log(selectedData);
 
-    if (selectedData.length === 0) {
-      this._snackBar.open('No items selected!', 'Close', { duration: 3000 });
-      return;
-    }
+    // If user reorders row
+    let rowData: PortfolioTable[] = [];
+    this.gridApi.forEachNode((node) => rowData.push(node.data));
 
-    this.portfolioTable$.pipe(take(1)).subscribe((data) => {
-      const updatedData = data.filter((item) => !selectedData.includes(item));
-      this.portfolioTable$.next(updatedData);
-      this.onEdit = false;
-      localStorage.setItem(
-        this.meta.title,
-        JSON.stringify({ timestamp: new Date(), data: updatedData })
-      );
-      this._snackBar.open('Portfolio successfully updated!', 'Close', {
-        duration: 3000,
-      });
+    console.log(rowData);
+
+    const updatedData = rowData.filter((item) => !selectedData.includes(item));
+    this.portfolioTable$.next(updatedData);
+    this.onEdit = false;
+    localStorage.setItem(
+      this.meta.title,
+      JSON.stringify({ timestamp: new Date(), data: updatedData })
+    );
+    this._snackBar.open('Portfolio successfully updated!', 'Close', {
+      duration: 3000,
     });
   }
 
@@ -170,5 +170,11 @@ export class PortfolioComponent extends PortfolioSource implements OnInit {
         this.landingPageService.userPortfolio$.next(data);
       });
     });
+  }
+
+  onKeyPressEvent(event: string) {
+    if (event === 'Escape') {
+      this.onEdit = false;
+    }
   }
 }

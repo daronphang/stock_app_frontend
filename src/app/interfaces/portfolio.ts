@@ -1,6 +1,7 @@
 export interface PortfolioTable {
   [key: string]: string;
   ticker: string;
+  earningsDate: string;
   price: string;
   beta: string;
   marketCap: string;

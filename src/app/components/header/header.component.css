@@ -11,3 +11,27 @@
   color: white;
   border-bottom: 0.1px solid white;
 }
+
+.activeRouterClass::after {
+  border-bottom: 2px solid white;
+  display: block;
+  content: '';
+  animation-name: activeRouter;
+  animation-duration: 0.5s;
+}
+
+@keyframes activeRouter {
+  0% {
+    transform: scaleX(0);
+    border-bottom: 0px;
+  }
+  100% {
+    transform: scaleX(1);
+    border-bottom: 2px solid white;
+  }
+}
+
+.custom-button {
+  color: white;
+  text-decoration: none;
+}

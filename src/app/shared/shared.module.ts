@@ -9,8 +9,15 @@ import { SearchComponent } from '../components/search/search.component';
 import { AlertsComponent } from '../components/alerts/alerts.component';
 import { ModalComponent } from '../components/modal/modal.component';
 import { CreatePortfolioComponent } from '../components/modal/create-portfolio/create-portfolio.component';
+import { KeyPressDirective } from '../directives/keypress.directive';
 
-const components = [SearchComponent, AlertsComponent, ModalComponent, CreatePortfolioComponent];
+const components = [
+  SearchComponent,
+  AlertsComponent,
+  ModalComponent,
+  CreatePortfolioComponent,
+  KeyPressDirective,
+];
 const modules = [
   CommonModule,
   FormsModule,

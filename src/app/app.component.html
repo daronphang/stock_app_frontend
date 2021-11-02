@@ -1,4 +1,5 @@
-<app-header></app-header>
-
-<router-outlet></router-outlet>
-<app-footer></app-footer>
+<app-header *ngIf="headerService.showHeader"></app-header>
+<div [@fadeAnimation]="getRouterOutletState(o)">
+  <router-outlet #o="outlet"></router-outlet>
+  <app-footer *ngIf="headerService.showHeader"></app-footer>
+</div>

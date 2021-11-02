@@ -12,9 +12,10 @@ import { AppComponent } from './app.component';
 import { AuthComponent } from './views/auth/auth.component';
 import { HeaderComponent } from './components/header/header.component';
 import { FooterComponent } from './components/footer/footer.component';
+import { EarningsComponent } from './views/earnings/earnings.component';
 
 @NgModule({
-  declarations: [AppComponent, AuthComponent, HeaderComponent, FooterComponent],
+  declarations: [AppComponent, AuthComponent, HeaderComponent, FooterComponent, EarningsComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,

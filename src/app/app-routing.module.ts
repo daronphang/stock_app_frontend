@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes, PreloadAllModules } from '@angular/router';
 import { AuthComponent } from './views/auth/auth.component';
+import { EarningsComponent } from './views/earnings/earnings.component';
 
 const routes: Routes = [
   {
@@ -8,7 +9,8 @@ const routes: Routes = [
     loadChildren: () =>
       import('./views/landing-page/landing-page.module').then((m) => m.LandingPageModule),
   },
-  { path: 'auth', component: AuthComponent },
+  { path: 'earnings', component: EarningsComponent, data: { animationState: 'Earnings' } },
+  { path: 'login', component: AuthComponent, data: { animationState: 'Login' } },
   { path: '', redirectTo: 'lp', pathMatch: 'full' },
   { path: '**', redirectTo: '/404' },
 ];

@@ -50,23 +50,14 @@ export class PortfolioService {
         .subscribe((msgs) => {
           this.errorMsgs$.next([...msgs, `Unable to retrieve data for ${ticker} from API.`]);
         });
-      return of('ticker does not exist');
+      return of('TICKER_NOT_EXIST');
     }
 
-    if (!errRes.error || !errRes.error.error) {
-      return throwError(errorMsg);
-    }
+    if (errRes.error) return throwError(errRes.error);
+    if (errRes.error.error) return throwError(errRes.error.error);
 
     return throwError(errorMsg);
   }
-
-  // // Delay 1s sending fetch request for each chunk of 5 tickers
-  // async delayFetch(chunk: string[], i: number) {
-  //   await new Promise((resolve) => setTimeout(resolve, i * 1500));
-  //   const chunk$ = chunk.map((ticker) => this.fetchData(ticker));
-  //   // Async function can only return a Promise, not Observable
-  //   return forkJoin(chunk$).toPromise();
-  // }
 
   fetchDataArr(tickerList: string[]) {
     // Maximum of 5 variables in array
@@ -75,12 +66,6 @@ export class PortfolioService {
       const chunk = tickerList.slice(i, i + 5);
       chunkArr.push(chunk);
     }
-
-    // const results$ = chunkArr.map((chunk, i) => {
-    //   return from(this.delayFetch(chunk, i));
-    // });
-
-    // return forkJoin(results$);
 
     const results$ = from(chunkArr).pipe(
       concatMap((chunk) => {
@@ -96,9 +81,11 @@ export class PortfolioService {
   mapData(item: any) {
     const stockData: PortfolioTable = {
       ticker: item.symbol,
-      price: item.price.regularMarketPrice.fmt,
+      earningsDate: item.calendarEvents?.earnings?.earningsDate[0].fmt,
+      price: item.price.regularMarketPrice?.fmt,
       beta: item.defaultKeyStatistics.beta?.fmt,
       marketCap: item.price.marketCap?.fmt,
+      ev: item.defaultKeyStatistics.enterpriseValue.fmt,
       sharesOut: item.defaultKeyStatistics?.sharesOutstanding?.fmt,
       evToEbidta: item.defaultKeyStatistics?.enterpriseToEbitda?.fmt,
       evToRev: item.defaultKeyStatistics?.enterpriseToRevenue?.fmt,

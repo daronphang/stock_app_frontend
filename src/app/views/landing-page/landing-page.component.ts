@@ -13,6 +13,7 @@ import { switchMap, take } from 'rxjs/operators';
 import { PortfolioSource } from './portfolio/portfolio-source.class';
 import { storageHandler } from 'src/app/helpers/storage';
 import { PortfolioMeta } from 'src/app/interfaces/portfolio';
+import { HeaderService } from 'src/app/components/header/header.service';
 
 @Component({
   selector: 'app-landing-page',
@@ -33,9 +34,11 @@ export class LandingPageComponent extends PortfolioSource implements OnInit {
   constructor(
     public portfolioService: PortfolioService,
     public landingPageService: LandingPageService,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    private headerService: HeaderService
   ) {
     super(portfolioService);
+    headerService.showHeader = true;
   }
 
   ngOnInit(): void {
@@ -87,36 +90,35 @@ export class LandingPageComponent extends PortfolioSource implements OnInit {
     });
   }
 
-  displaySearchTable(takeValue: number): void {
-    const resultObs$ = this.searchInput$
-      .pipe(
-        switchMap((tickers) => {
-          this.isLoading = true;
-          return this.portfolioService.fetchDataArr(tickers);
-        })
-      )
-      .pipe(take(takeValue));
-    this.displayPortfolioTable(resultObs$);
-  }
-
   onSearchHandler(event: SearchEvent) {
-    console.log(event.input);
+    // To trigger onSearch and isLoading only
+    if (event.input === 'SEARCHING') {
+      this.isLoading = true;
+      this.onSearch = true;
+      return;
+    }
+
     // If user clears search
     if (event.input === '') {
-      return (this.onSearch = false);
+      this.isLoading = false;
+      this.onSearch = false;
+      return;
     }
-    this.onSearch = true;
 
     if (event.results.length > 0) {
-      const searchTickers: string[] = [];
-      // search results in [{name: 'Micron', ticker: 'MU'}]
-      event.results.forEach((item) => searchTickers.push(item.ticker));
-      const takeValue = Math.ceil(searchTickers.length / 5);
-      this.searchInput$.next(searchTickers);
-      return this.displaySearchTable(takeValue);
+      const finalData: any[] = [];
+      const cleanData = event.results.filter((item) => item);
+      cleanData.forEach((item) => {
+        const stockData = this.portfolioService.mapData(item);
+        finalData.push(stockData);
+      });
+      this.portfolioTable$.next(finalData);
+      this.isLoading = false;
+      return;
     }
-    // send request to API with single ticker
-    this.searchInput$.next([event.input]);
-    return this.displaySearchTable(1);
+
+    // If search returned no results
+    this.isLoading = false;
+    this.portfolioTable$.next(event.results);
   }
 }
