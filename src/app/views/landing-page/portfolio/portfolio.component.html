@@ -24,6 +24,20 @@
   Your search returned zero results.
 </div> -->
 
+<div *ngIf="onEdit">
+  <mat-form-field appearance="fill" style="width: 100%">
+    <mat-label>New Portfolio Name</mat-label>
+    <input
+      matInput
+      type="text"
+      placeholder="Enter New Portfolio Name"
+      [(ngModel)]="newPortfolioName"
+    />
+  </mat-form-field>
+  <mat-error *ngIf="sameNameError">You cannot use existing portfolio name.</mat-error>
+  <div style="margin-top: 2em"></div>
+</div>
+
 <div *ngIf="!isLoading">
   <ag-grid-angular
     #agGrid
@@ -33,9 +47,9 @@
     [rowData]="portfolioTable$ | async"
     [defaultColDef]="defaultColDef"
     [columnDefs]="onEdit ? editColumnDefs : columnDefs"
-    [rowDragManaged]="true"
+    [rowDragManaged]="onEdit"
     [rowDragEntireRow]="true"
-    [rowDragMultiRow]="true"
+    [rowDragMultiRow]="onEdit"
     rowSelection="multiple"
     (gridReady)="onGridReady($event)"
     (firstDataRendered)="onFirstDataRendered($event)"

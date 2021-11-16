@@ -11,6 +11,7 @@ import {
 import { PortfolioTable } from 'src/app/interfaces/portfolio';
 import { PortfolioService } from './portfolio.service';
 import { take } from 'rxjs/operators';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 export class PortfolioSource {
   portfolioTable$ = new BehaviorSubject<PortfolioTable[]>([]);
@@ -55,7 +56,7 @@ export class PortfolioSource {
     ...this.columnDefs,
   ];
 
-  constructor(public portfolioService: PortfolioService) {}
+  constructor(public portfolioService: PortfolioService, public snackBar: MatSnackBar) {}
 
   // To autosize columns not visible in DOM, need call both GridReady and FirstDataRendered
   // GridReady to fit all columns on DOM first
@@ -72,22 +73,30 @@ export class PortfolioSource {
     params.columnApi.autoSizeColumns(allColIds);
   }
 
+  // Set loading to false, push final array to portfoliotable$ and add to session storage
   onFinalize(finalData: any[], isStore: boolean, key: string) {
     this.isLoading = false;
     this.portfolioTable$.next(finalData);
     this.timestamp = new Date(new Date());
     if (isStore)
-      localStorage.setItem(key, JSON.stringify({ timestamp: new Date(), data: finalData }));
+      sessionStorage.setItem(key, JSON.stringify({ timestamp: new Date(), data: finalData }));
   }
 
-  displayPortfolioTable(resultObs$: Observable<any[]>, isStore: boolean = false, key: string = '') {
-    const finalData: PortfolioTable[] = [];
+  displayPortfolioTable(
+    resultObs$: Observable<any[]>,
+    takeValue: number,
+    originalData: PortfolioTable[],
+    isStore: boolean = false,
+    key: string = '',
+    successMsg: string,
+    errMsg: string
+  ) {
+    const finalData: PortfolioTable[] = originalData;
     this.isLoading = true;
 
-    resultObs$.pipe(take(1)).subscribe(
+    resultObs$.pipe(take(takeValue)).subscribe(
       (data: any[]) => {
         const cleanData = data.filter((item) => item);
-        console.log(cleanData);
         cleanData.forEach((item) => {
           const stockData = this.portfolioService.mapData(item);
           finalData.push(stockData);
@@ -96,9 +105,16 @@ export class PortfolioSource {
       (err) => {
         console.error(err);
         this.isLoading = false;
+        this.snackBar.open(`${errMsg}: ${err}`, 'Close', {
+          panelClass: 'error-snackbar',
+        });
       },
       () => {
         this.onFinalize(finalData, isStore, key);
+        this.snackBar.open(`${successMsg}`, 'Close', {
+          panelClass: 'success-snackbar',
+          duration: 5000,
+        });
       }
     );
   }

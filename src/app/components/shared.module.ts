@@ -1,14 +1,14 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MaterialModule } from '../material/material.module';
+import { MaterialModule } from './material/material.module';
 import { AgGridModule } from 'ag-grid-angular';
 import { NgbPopoverModule } from '@ng-bootstrap/ng-bootstrap';
 
-import { SearchComponent } from '../components/search/search.component';
-import { AlertsComponent } from '../components/alerts/alerts.component';
-import { ModalComponent } from '../components/modal/modal.component';
-import { CreatePortfolioComponent } from '../components/modal/create-portfolio/create-portfolio.component';
+import { SearchComponent } from './search/search.component';
+import { AlertsComponent } from './alerts/alerts.component';
+import { ModalComponent } from './modal/modal.component';
+import { CreatePortfolioComponent } from './modal/create-portfolio/create-portfolio.component';
 import { KeyPressDirective } from '../directives/keypress.directive';
 
 const components = [

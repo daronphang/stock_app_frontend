@@ -8,24 +8,25 @@
   </form>
 
   <div style="margin-top: 2em"></div>
-  <app-search (results)="onSearchHandler($event)"></app-search>
+  <app-search (results)="onSearchHandler($event)" [autocompleteOnly]="true"></app-search>
   <div style="margin-top: 2em"></div>
 
   <div *ngIf="isLoading">
     <mat-spinner [diameter]="70" class="spinner"></mat-spinner>
   </div>
 
-  <ag-grid-angular
-    #agGrid
-    *ngIf="!isLoading"
-    class="ag-theme-balham"
-    style="width: 100%; height: 10em"
-    domLayout="autoHeight"
-    [rowData]="displayResults$ | async"
-    [columnDefs]="columnDefs"
-    rowSelection="multiple"
-    (gridReady)="onGridReady($event)"
-  ></ag-grid-angular>
+  <div *ngIf="!isLoading" style="height: 12em">
+    <ag-grid-angular
+      #agGrid
+      class="ag-theme-balham"
+      style="width: 100%; height: 100%"
+      [rowData]="displayResults$ | async"
+      [columnDefs]="columnDefs"
+      rowSelection="multiple"
+      (gridReady)="onGridReady($event)"
+    ></ag-grid-angular>
+  </div>
+
   <div>
     <button mat-button (click)="onSelectHandler('add')">
       Add
@@ -36,7 +37,7 @@
       <i class="fas fa-trash-alt"></i>
     </button>
   </div>
-  <div style="margin-top: 2em" *ngIf="!((selectedTickers$ | async)?.length === 0)">
-    Selected Stocks: {{ selectedTickers$ | async }}
+  <div style="margin-top: 2em" *ngIf="selectedTickers.length > 0">
+    Selected Stocks: {{ selectedTickers }}
   </div>
 </div>

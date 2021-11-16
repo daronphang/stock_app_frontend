@@ -10,6 +10,7 @@ import {
   AfterViewInit,
   OnDestroy,
 } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, fromEvent, of, Subscription } from 'rxjs';
 import {
   catchError,
@@ -21,6 +22,7 @@ import {
   tap,
 } from 'rxjs/operators';
 import { SearchEvent } from 'src/app/interfaces/generic';
+import { StockSearch } from 'src/app/interfaces/portfolio';
 import { PortfolioService } from '../../views/landing-page/portfolio/portfolio.service';
 
 @Component({
@@ -32,15 +34,20 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input('originalArr') originalArr: any[] = [];
   @Input('searchClass') searchClass: string = 'search';
   @Input('showIcon') showIcon: boolean = true;
+  @Input('autocompleteOnly') autoCompleteOnly: boolean = false;
   @Output() results = new EventEmitter<SearchEvent>();
   @ViewChild('searchBox') searchBox: ElementRef;
 
   input: string; // Needed as InputEvent fires on every key trigger
   inputSub: Subscription;
   autocompleteResults$ = new BehaviorSubject<any[]>([]);
-  stockExchanges: string[] = ['NMS', 'NYQ', 'SES', 'HKG'];
+  stockExchanges: string[] = ['NMS', 'NYQ', 'SES', 'HKG', 'NCM', 'NGM'];
 
-  constructor(private http: HttpClient, private portfolioService: PortfolioService) {}
+  constructor(
+    private http: HttpClient,
+    private portfolioService: PortfolioService,
+    public snackBar: MatSnackBar
+  ) {}
 
   ngOnInit(): void {}
 
@@ -61,6 +68,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
 
           // return original array of items if input is empty
           if (!value) {
+            this.results.emit({ results: [], input: this.input });
             return of(null); // will be checked in subscribe
           }
           return this.fetchAutocomplete(value);
@@ -76,23 +84,28 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
           // Clean results to include stock exchanges only
           quotes = quotes.map((item) => {
             if (!this.stockExchanges.includes(item.exchange)) return null;
-            return item.symbol;
-            // return {
-            //   name: item.shortname,
-            //   ticker: item.symbol,
-            // };
+            return {
+              name: item.shortname,
+              ticker: item.symbol,
+            };
           });
 
           // Filter null values
-          quotes = quotes.filter((item) => item);
-          return quotes;
+          const stockQuotes: StockSearch[] = quotes.filter((item) => item);
+          // For autocomplete only, will not fetch 2nd API
+          if (this.autoCompleteOnly) {
+            this.results.emit({ results: stockQuotes, input: this.input });
+            return [];
+          }
+
+          return stockQuotes.map((item) => item.ticker);
         }),
         switchMap((tickers: string[]) => {
-          this.results.emit({ results: [], input: 'SEARCHING' });
-
           if (tickers.length === 0) {
             return of([]);
           }
+
+          this.results.emit({ results: [], input: 'SEARCHING' });
 
           // Fetch 2nd API call to get data for each stock
           takeValue = Math.ceil(tickers.length / 5);
@@ -102,9 +115,10 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
           // This tap is needed to end 2nd API subscription using take() method
           // input subscription SHOULD NOT END as it still needs to read changes to input
           // results are emitted in chunks; autocompleteHandler will emit value in final()
-          console.log(results);
-          this.autocompleteResults$.next(results);
-          this.onAutocompleteHandler(takeValue);
+          if (results.length > 0) {
+            this.autocompleteResults$.next(results);
+            this.onAutocompleteHandler(takeValue);
+          }
         })
       )
       .subscribe(

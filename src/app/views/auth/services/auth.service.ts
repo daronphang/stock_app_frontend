@@ -20,7 +20,7 @@ export class AuthService {
       Authorization: btoa('Basic ' + `${email}:${password}`),
     });
     return this.http
-      .get<LoggedUser>('http://127.0.0.1:4280/auth/login', {
+      .get<LoggedUser>('http://localhost:4280/daron/auth/login', {
         withCredentials: true,
         headers: headers,
       })
@@ -42,7 +42,7 @@ export class AuthService {
       return throwError(errorMsg);
     }
 
-    switch (errRes.error.error) {
+    switch (errRes.error.message) {
       case 'LOGIN_USER_NOT_EXIST':
         errorMsg = 'No existing credentials found in database.';
         break;

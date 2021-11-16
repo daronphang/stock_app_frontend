@@ -81,7 +81,7 @@ export class PortfolioService {
   mapData(item: any) {
     const stockData: PortfolioTable = {
       ticker: item.symbol,
-      earningsDate: item.calendarEvents?.earnings?.earningsDate[0].fmt,
+      earningsDate: item.calendarEvents?.earnings?.earningsDate[0]?.fmt,
       price: item.price.regularMarketPrice?.fmt,
       beta: item.defaultKeyStatistics.beta?.fmt,
       marketCap: item.price.marketCap?.fmt,
