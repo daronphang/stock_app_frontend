@@ -62,13 +62,13 @@ export class LandingPageComponent extends PortfolioSource implements OnInit {
       .fetchPortfolios()
       .pipe(
         switchMap((res) => {
-          console.log(res);
           res.forEach((item) => {
             const portfolio = sessionStorage.getItem(item.portfolioName);
             portfolio ? null : item.tickers.forEach((ticker) => uniqueTickers.add(ticker));
           });
-          this.landingPageService.userPortfolio$.next(res);
 
+          this.landingPageService.userPortfolio$.next(res);
+          this.isLoading = false;
           // Fetches chunk of 5 stocks per API request
           // Each portfolio will check if the ticker is included
           return this.portfolioService.fetchDataArr(Array.from(uniqueTickers));
@@ -80,12 +80,10 @@ export class LandingPageComponent extends PortfolioSource implements OnInit {
         },
         (err) => {
           this.errorMsg = err;
-          this.isLoading = false;
           this.portfolioService.errorMsgs$.next([err]);
         },
         () => {
           this.dataSource.next(['completed']);
-          this.isLoading = false;
         }
       );
   }

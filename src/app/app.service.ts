@@ -9,6 +9,7 @@ export class AppService {
   constructor() {}
 
   handleError(err: HttpErrorResponse) {
+    if (typeof err === 'string') return throwError(err);
     if (!err.error && !err.error.error) return throwError('An unknown error occurred.');
     if (!err.error.error) return throwError(err.message);
     return throwError(err.error.message);

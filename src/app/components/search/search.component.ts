@@ -116,6 +116,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
           // input subscription SHOULD NOT END as it still needs to read changes to input
           // results are emitted in chunks; autocompleteHandler will emit value in final()
           if (results.length > 0) {
+            console.log(results);
             this.autocompleteResults$.next(results);
             this.onAutocompleteHandler(takeValue);
           }
