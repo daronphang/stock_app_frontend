@@ -1,9 +1,4 @@
 <div>
-  <div class="alerts" *ngIf="portfolioService.errorMsgs$ | async">
-    <div *ngFor="let msg of portfolioService.errorMsgs$ | async">
-      <app-alerts [msg]="msg"></app-alerts>
-    </div>
-  </div>
   <div class="break"></div>
   <app-search (results)="onSearchHandler($event)" *ngIf="!onReorder"></app-search>
   <div class="break"></div>

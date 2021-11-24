@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { BehaviorSubject, of, Subscription } from 'rxjs';
-import { take, switchMap, catchError } from 'rxjs/operators';
+import { take, switchMap, catchError, delay } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { MatAccordion } from '@angular/material/expansion';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -15,6 +15,7 @@ import { PortfolioSource } from './portfolio/portfolio-source.class';
 import { PortfolioMeta } from 'src/app/interfaces/portfolio';
 import { AppService } from 'src/app/app.service';
 import { ColDef, GridApi, GridReadyEvent } from 'ag-grid-community';
+import { AlertsService } from 'src/app/components/alerts/alerts.service';
 
 @Component({
   selector: 'app-landing-page',
@@ -31,6 +32,8 @@ export class LandingPageComponent extends PortfolioSource implements OnInit {
   errorMsg: string;
   onCreate: boolean = false;
 
+  testNumber: number = 1;
+
   reorderGridApi: GridApi;
 
   // Observable to be used if portfolio data does not exist in session storage
@@ -40,6 +43,7 @@ export class LandingPageComponent extends PortfolioSource implements OnInit {
 
   constructor(
     private headerService: HeaderService,
+    private alertsService: AlertsService,
     private appService: AppService,
     public portfolioService: PortfolioService,
     public landingPageService: LandingPageService,
@@ -80,7 +84,7 @@ export class LandingPageComponent extends PortfolioSource implements OnInit {
         },
         (err) => {
           this.errorMsg = err;
-          this.portfolioService.errorMsgs$.next([err]);
+          this.alertsService.displayMessage(err);
         },
         () => {
           this.dataSource.next(['completed']);
@@ -202,9 +206,10 @@ export class LandingPageComponent extends PortfolioSource implements OnInit {
   }
 
   testErrorHandler() {
-    this.portfolioService.errorMsgs$.pipe(take(1)).subscribe((data) => {
-      this.portfolioService.errorMsgs$.next([...data, 'hello world']);
+    this.alertsService.displayMessage(`hello world ${this.testNumber}`, {
+      delay: '2s',
     });
+    this.testNumber += 1;
   }
 
   onKeyPressEvent(event: string) {

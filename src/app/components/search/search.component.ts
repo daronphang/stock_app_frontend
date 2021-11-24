@@ -24,6 +24,7 @@ import {
 import { SearchEvent } from 'src/app/interfaces/generic';
 import { StockSearch } from 'src/app/interfaces/portfolio';
 import { PortfolioService } from '../../views/landing-page/portfolio/portfolio.service';
+import { AlertsService } from '../alerts/alerts.service';
 
 @Component({
   selector: 'app-search',
@@ -46,6 +47,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private http: HttpClient,
     private portfolioService: PortfolioService,
+    private alertsService: AlertsService,
     public snackBar: MatSnackBar
   ) {}
 
@@ -125,12 +127,7 @@ export class SearchComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe(
         (results) => {},
         (err) => {
-          this.portfolioService.errorMsgs$.pipe(take(1)).subscribe((msgs) => {
-            this.portfolioService.errorMsgs$.next([
-              ...msgs,
-              `An error occured while searching: ${err}`,
-            ]);
-          });
+          this.alertsService.displayMessage(`An error occured while searching: ${err}`);
           this.results.emit({ results: [], input: 'DISPLAY_ERROR' });
         }
       );

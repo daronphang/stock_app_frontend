@@ -5,6 +5,7 @@ import { catchError } from 'rxjs/operators';
 import { AppService } from 'src/app/app.service';
 import { AuthService } from 'src/app/views/auth/services/auth.service';
 import { PortfolioService } from 'src/app/views/landing-page/portfolio/portfolio.service';
+import { AlertsService } from '../alerts/alerts.service';
 
 @Component({
   selector: 'app-header',
@@ -16,6 +17,7 @@ export class HeaderComponent implements OnInit {
     public authService: AuthService,
     private appService: AppService,
     private porfolioService: PortfolioService,
+    private alertsService: AlertsService,
     private http: HttpClient,
     private router: Router
   ) {}
@@ -32,7 +34,7 @@ export class HeaderComponent implements OnInit {
           this.authService.isAuthenticated = false;
           this.router.navigate(['/logout']);
         },
-        (err) => this.porfolioService.errorMsgs$.next(err)
+        (err) => this.alertsService.displayMessage(err)
       );
   }
 }
