@@ -3,15 +3,15 @@ import { PortfolioTable } from 'src/app/interfaces/portfolio';
 import { catchError, concatMap, map, take, tap } from 'rxjs/operators';
 import { BehaviorSubject, forkJoin, from, Observable, of, throwError } from 'rxjs';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { AlertsService } from 'src/app/components/alerts/alerts.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PortfolioService {
   stockData: PortfolioTable[] = [];
-  errorMsgs$ = new BehaviorSubject<string[]>([]);
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private alertsService: AlertsService) {}
 
   fetchData(ticker: string) {
     const headers = {
@@ -42,14 +42,7 @@ export class PortfolioService {
     // If ticker does not exist
     // To continue sending request and not throw error
     if (errRes.status === 302) {
-      this.errorMsgs$
-        .pipe(
-          map((msgs) => msgs),
-          take(1)
-        )
-        .subscribe((msgs) => {
-          this.errorMsgs$.next([...msgs, `Unable to retrieve data for ${ticker} from API.`]);
-        });
+      this.alertsService.displayMessage(`Unable to retrieve data for ${ticker} from API.`);
       return of('TICKER_NOT_EXIST');
     }
 
@@ -81,7 +74,7 @@ export class PortfolioService {
   mapData(item: any) {
     const stockData: PortfolioTable = {
       ticker: item.symbol,
-      earningsDate: item.calendarEvents?.earnings?.earningsDate[0].fmt,
+      earningsDate: item.calendarEvents?.earnings?.earningsDate[0]?.fmt,
       price: item.price.regularMarketPrice?.fmt,
       beta: item.defaultKeyStatistics.beta?.fmt,
       marketCap: item.price.marketCap?.fmt,

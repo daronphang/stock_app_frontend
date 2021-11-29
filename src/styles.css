@@ -11,7 +11,6 @@
 html,
 body,
 header {
-  height: 100vh;
   margin: 0;
   background: #1a1b1c;
   padding-left: 20px;
@@ -74,12 +73,24 @@ header {
   flex-direction: column;
 }
 
-.mat-simple-snackbar {
+/* .mat-simple-snackbar {
   padding: 20px;
-}
+} */
 
 /* CSS styles for ag-grid */
 .delete-header {
   background-color: #f96f6f;
   color: #ffffff;
+}
+
+.error-snackbar {
+  color: white !important;
+  background-color: #f85c5c !important;
+  max-width: 50em !important;
+}
+
+.success-snackbar {
+  color: white !important;
+  background-color: #068822 !important;
+  max-width: 50em !important;
 }

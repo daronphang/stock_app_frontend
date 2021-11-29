@@ -1,7 +1,10 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes, PreloadAllModules } from '@angular/router';
 import { AuthComponent } from './views/auth/auth.component';
+import { AuthGuardService } from './views/auth/services/auth-guard.service';
 import { EarningsComponent } from './views/earnings/earnings.component';
+import { ErrorComponent } from './views/error/error.component';
+import { LogoutComponent } from './views/logout/logout.component';
 
 const routes: Routes = [
   {
@@ -11,6 +14,12 @@ const routes: Routes = [
   },
   { path: 'earnings', component: EarningsComponent, data: { animationState: 'Earnings' } },
   { path: 'login', component: AuthComponent, data: { animationState: 'Login' } },
+  {
+    path: 'logout',
+    component: LogoutComponent,
+    data: { animationState: 'Logout' },
+  },
+  { path: '404', component: ErrorComponent, data: { animationState: 'error' } },
   { path: '', redirectTo: 'lp', pathMatch: 'full' },
   { path: '**', redirectTo: '/404' },
 ];

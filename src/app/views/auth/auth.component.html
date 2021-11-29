@@ -1,29 +1,79 @@
 <div>
   <div role="alert" *ngIf="errorMsg" class="error-msg">Login was unsuccessful. {{ errorMsg }}</div>
   <div class="login">
-    <h2><strong>Stock Screener Login</strong></h2>
-    <form [formGroup]="form" (ngSubmit)="onSubmitHandler()">
-      <mat-form-field class="mt-4">
-        <input matInput type="text" placeholder="Enter Email" formControlName="email" />
-        <mat-error *ngIf="form.controls['email'].hasError">Please enter your email.</mat-error>
-      </mat-form-field>
-      <mat-form-field class="mt-4">
-        <input matInput type="password" placeholder="Enter Password" formControlName="password" />
-        <mat-error *ngIf="form.controls['password'].hasError"
-          >Please enter your password.</mat-error
-        >
-      </mat-form-field>
+    <h2>
+      <strong>Stock Screener {{ isLogin ? 'Login' : 'Signup' }}</strong>
+    </h2>
 
+    <form *ngIf="isLogin" [formGroup]="loginForm" (ngSubmit)="onLoginHandler()">
+      <div *ngFor="let input of inputFields$ | async">
+        <mat-form-field class="mt-4">
+          <input
+            matInput
+            [type]="input.type"
+            [placeholder]="input.placeholder"
+            [formControlName]="input.fcn"
+            autocomplete="on"
+          />
+          <mat-error *ngIf="loginForm.controls[input.fcn].hasError">{{ input.errorMsg }}</mat-error>
+        </mat-form-field>
+      </div>
       <div class="submit">
         <mat-spinner id="spinner" [diameter]="50" *ngIf="isLoading"></mat-spinner>
         <button
           mat-raised-button
+          style="margin-right: 15px"
           color="primary"
-          [disabled]="!form.valid"
+          [disabled]="!loginForm.valid"
           type="submit"
           *ngIf="!isLoading"
         >
           Submit
+        </button>
+        <button
+          mat-raised-button
+          color="primary"
+          *ngIf="!isLoading"
+          (click)="onSwitchHandler('SIGNUP')"
+        >
+          Signup
+        </button>
+      </div>
+    </form>
+
+    <form *ngIf="!isLogin" [formGroup]="signupForm" (ngSubmit)="onSignupHandler()">
+      <div *ngFor="let input of inputFields$ | async">
+        <mat-form-field class="mt-4">
+          <input
+            matInput
+            [type]="input.type"
+            [placeholder]="input.placeholder"
+            [formControlName]="input.fcn"
+          />
+          <mat-error *ngIf="signupForm.controls[input.fcn].hasError">{{
+            input.errorMsg
+          }}</mat-error>
+        </mat-form-field>
+      </div>
+      <div class="submit">
+        <mat-spinner id="spinner" [diameter]="50" *ngIf="isLoading"></mat-spinner>
+        <button
+          mat-raised-button
+          style="margin-right: 15px"
+          color="primary"
+          [disabled]="!signupForm.valid"
+          type="submit"
+          *ngIf="!isLoading"
+        >
+          Submit
+        </button>
+        <button
+          mat-raised-button
+          color="primary"
+          *ngIf="!isLoading"
+          (click)="onSwitchHandler('LOGIN')"
+        >
+          Login
         </button>
       </div>
     </form>

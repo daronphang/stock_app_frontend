@@ -21,10 +21,15 @@ export interface PortfolioTable {
 
 export interface PortfolioMeta {
   [key: string]: string | number | string[] | boolean;
-  title: string;
+  portfolioName: string;
   tickers: string[];
-  // delayMultiplier: number;
-  // storage: boolean;
+  orderId: number;
+}
+
+export interface GetPortfolio {
+  [key: string]: string | PortfolioMeta[];
+  message: string;
+  results: PortfolioMeta[];
 }
 
 export interface StockSearch {
@@ -33,8 +38,8 @@ export interface StockSearch {
   ticker: string;
 }
 
-export interface PopoverSearch {
-  [key: string]: string;
-  ticker: string;
-  name: string;
+export interface ReorderData {
+  [key: string]: string | number;
+  portfolioName: string;
+  orderId: number;
 }

@@ -15,6 +15,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatDialogModule } from '@angular/material/dialog';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 const modules = [
   MatToolbarModule,
@@ -32,6 +33,7 @@ const modules = [
   MatCheckboxModule,
   MatExpansionModule,
   MatDialogModule,
+  DragDropModule,
 ];
 
 @NgModule({

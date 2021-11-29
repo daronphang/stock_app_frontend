@@ -1,11 +1,6 @@
 <div>
-  <div *ngIf="portfolioService.errorMsgs$ | async">
-    <div *ngFor="let msg of portfolioService.errorMsgs$ | async">
-      <app-alerts [msg]="msg"></app-alerts>
-    </div>
-  </div>
   <div class="break"></div>
-  <app-search [originalArr]="stockSearchList" (results)="onSearchHandler($event)"></app-search>
+  <app-search (results)="onSearchHandler($event)" *ngIf="!onReorder"></app-search>
   <div class="break"></div>
 
   <div *ngIf="onSearch" class="stock-table-container">
@@ -24,11 +19,23 @@
     ></ag-grid-angular>
   </div>
 
-  <div *ngIf="!onSearch">
+  <div class="reorder" *ngIf="onReorder" keyPress (keyValue)="onKeyPressEvent($event)">
+    <app-reorder (reorderStatus)="reorderEventHandler($event)"></app-reorder>
+  </div>
+
+  <div *ngIf="!onSearch && !onReorder">
     <div class="action-buttons">
       <button mat-button (click)="accordion.openAll()">Expand All</button>
       <button mat-button (click)="accordion.closeAll()">Collapse All</button>
       <div class="flex-spacer"></div>
+      <button mat-button (click)="testErrorHandler()">
+        Test Error
+        <i class="fas fa-plus-circle"></i>
+      </button>
+      <button mat-button (click)="onReorderHandler()">
+        Reorder
+        <i class="fas fa-plus-circle"></i>
+      </button>
       <button mat-button (click)="onCreatePortfolioHandler()">
         Create Portfolio
         <i class="fas fa-plus-circle"></i>
@@ -37,14 +44,26 @@
 
     <mat-spinner *ngIf="isLoading" [diameter]="70" class="spinner"></mat-spinner>
 
-    <div class="stock-table-container" *ngIf="!isLoading">
+    <div *ngIf="errorMsg && !isLoading">{{ errorMsg }}</div>
+
+    <div class="stock-table-container" *ngIf="!isLoading && !errorMsg">
       <mat-accordion hideToggle="false" multi>
-        <div *ngFor="let item of userPortfolio$ | async">
+        <div *ngFor="let item of landingPageService.userPortfolio$ | async">
           <mat-expansion-panel expanded="true">
             <mat-expansion-panel-header>
-              <mat-panel-title style="font-weight: bold"> {{ item.title }} </mat-panel-title>
+              <mat-panel-title style="font-weight: bold">
+                {{ item.portfolioName }}
+              </mat-panel-title>
             </mat-expansion-panel-header>
-            <app-portfolio [meta]="item" [dataSource]="dataSource"></app-portfolio>
+            <div style="min-height: 20em">
+              <app-portfolio
+                [id]="item.portfolioName"
+                [meta]="item"
+                [dataSource]="dataSource"
+                [onCreate]="onCreate"
+                (deletePortfolio)="onDeletePortfolioHandler($event)"
+              ></app-portfolio>
+            </div>
           </mat-expansion-panel>
         </div>
       </mat-accordion>

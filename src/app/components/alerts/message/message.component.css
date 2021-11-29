@@ -1,0 +1,22 @@
+.message {
+  display: flex;
+  align-items: center;
+  border-radius: 5px;
+  padding-left: 10px;
+  width: 100%;
+  animation-name: fade;
+}
+
+.default {
+  background: #fdca64;
+  color: black;
+}
+
+@keyframes fade {
+  0% {
+    opacity: 100;
+  }
+  100% {
+    opacity: 0;
+  }
+}

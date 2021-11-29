@@ -1,0 +1,22 @@
+<div class="reorder">
+  <div style="font-size: 25px">Reorder Portfolio</div>
+
+  <div cdkDropList class="example-list" (cdkDropListDropped)="drop($event)">
+    <div class="example-box" *ngFor="let item of portfolioNames" cdkDrag>
+      <div class="example-custom-placeholder" *cdkDragPlaceholder></div>
+      {{ item }}
+    </div>
+  </div>
+  <mat-spinner id="spinner" [diameter]="50" *ngIf="isLoading" class="spinner"></mat-spinner>
+  <div class="buttons" *ngIf="!isLoading">
+    <button mat-button (click)="onSaveHandler()">
+      Save
+      <i class="fas fa-check-circle" style="color: green"></i>
+    </button>
+    <button mat-button (click)="onCancelHandler()">
+      Cancel
+      <i class="fas fa-times-circle" style="color: red"></i>
+    </button>
+  </div>
+  <div style="margin-top: 5em"></div>
+</div>

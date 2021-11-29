@@ -1,0 +1,10 @@
+<div
+  [ngClass]="finalClass"
+  [ngStyle]="{ 'animation-delay': delay, 'animation-duration': duration }"
+>
+  <button mat-icon-button (click)="onCloseHandler()">
+    <i class="fas fa-times-circle" style="font-size: 20px"></i>
+  </button>
+  <div>{{ message }}</div>
+</div>
+<div style="height: 10px"></div>

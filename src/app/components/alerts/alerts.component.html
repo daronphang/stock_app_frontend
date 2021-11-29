@@ -1,7 +1,11 @@
-<div [ngClass]="alertClass" [ngStyle]="{ 'animation-delay': delay }" *ngIf="!hide">
-  <div>{{ msg }}</div>
-  <div class="flex-spacer"></div>
-  <button mat-icon-button (click)="onCloseHandler()">
-    <i class="fas fa-times-circle" style="font-size: 20px"></i>
-  </button>
+<div class="alerts">
+  <div *ngFor="let msg of alertsService.messages$ | async">
+    <app-message
+      [id]="msg.id"
+      [message]="msg.message"
+      [timeout]="msg.timeout"
+      [msgClass]="msg.msgClass"
+      [delay]="msg.delay"
+    ></app-message>
+  </div>
 </div>

@@ -1,19 +1,21 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { BehaviorSubject, of, Subscription } from 'rxjs';
+import { take, switchMap, catchError, delay } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
 import { MatAccordion } from '@angular/material/expansion';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 
 import { ModalComponent } from 'src/app/components/modal/modal.component';
-
 import { PortfolioService } from './portfolio/portfolio.service';
 import { LandingPageService } from './landing-page.service';
-import { StockSearchList } from 'src/app/shared/search-stock-list';
-import { SearchEvent } from 'src/app/interfaces/generic';
-import { switchMap, take } from 'rxjs/operators';
-import { PortfolioSource } from './portfolio/portfolio-source.class';
-import { storageHandler } from 'src/app/helpers/storage';
-import { PortfolioMeta } from 'src/app/interfaces/portfolio';
 import { HeaderService } from 'src/app/components/header/header.service';
+import { SearchEvent } from 'src/app/interfaces/generic';
+import { PortfolioSource } from './portfolio/portfolio-source.class';
+import { PortfolioMeta } from 'src/app/interfaces/portfolio';
+import { AppService } from 'src/app/app.service';
+import { ColDef, GridApi, GridReadyEvent } from 'ag-grid-community';
+import { AlertsService } from 'src/app/components/alerts/alerts.service';
 
 @Component({
   selector: 'app-landing-page',
@@ -23,21 +25,33 @@ import { HeaderService } from 'src/app/components/header/header.service';
 export class LandingPageComponent extends PortfolioSource implements OnInit {
   @ViewChild(MatAccordion) accordion: MatAccordion;
 
-  userPortfolio$ = new BehaviorSubject<PortfolioMeta[]>([]);
+  userPortfolio: string[] = [];
   searchInput$ = new BehaviorSubject<string[]>([]);
   onSearch: boolean = false;
-  stockSearchList = StockSearchList;
+  onReorder: boolean = false;
+  errorMsg: string;
+  onCreate: boolean = false;
 
-  // Observable to be used if portfolio data does not exist in local storage
+  testNumber: number = 1;
+
+  reorderGridApi: GridApi;
+
+  // Observable to be used if portfolio data does not exist in session storage
   dataSource = new BehaviorSubject<any[]>([]);
 
+  reorderColumnDefs: ColDef[] = [{ headerName: 'Portfolio Name', field: 'portfolioName' }];
+
   constructor(
+    private headerService: HeaderService,
+    private alertsService: AlertsService,
+    private appService: AppService,
     public portfolioService: PortfolioService,
     public landingPageService: LandingPageService,
     public dialog: MatDialog,
-    private headerService: HeaderService
+    public snackBar: MatSnackBar,
+    private http: HttpClient
   ) {
-    super(portfolioService);
+    super(portfolioService, snackBar);
     headerService.showHeader = true;
   }
 
@@ -48,26 +62,34 @@ export class LandingPageComponent extends PortfolioSource implements OnInit {
     // If multiple portfolios have same stock, will only fetch once
     // if portfolio data exists in local storage, will not fetch
     const uniqueTickers = new Set<string>();
-    this.landingPageService.fetchPortfolio().subscribe(
-      (portfolioData) => {
-        this.isLoading = false;
-        portfolioData.forEach((portfolio) => {
-          storageHandler('LOCAL', portfolio.title).subscribe(
-            () => (portfolio.storage = true),
-            (err) => portfolio.tickers.forEach((ticker) => uniqueTickers.add(ticker))
-          );
-        });
-        this.userPortfolio$.next(portfolioData);
-        this.portfolioService.fetchDataArr(Array.from(uniqueTickers)).subscribe(
-          (results) => this.dataSource.next(results),
-          (err) => {},
-          () => {
-            this.dataSource.next(['completed']);
-          }
-        );
-      },
-      (err) => {}
-    );
+    this.landingPageService
+      .fetchPortfolios()
+      .pipe(
+        switchMap((res) => {
+          res.forEach((item) => {
+            const portfolio = sessionStorage.getItem(item.portfolioName);
+            portfolio ? null : item.tickers.forEach((ticker) => uniqueTickers.add(ticker));
+          });
+
+          this.landingPageService.userPortfolio$.next(res);
+          this.isLoading = false;
+          // Fetches chunk of 5 stocks per API request
+          // Each portfolio will check if the ticker is included
+          return this.portfolioService.fetchDataArr(Array.from(uniqueTickers));
+        })
+      )
+      .subscribe(
+        (results) => {
+          this.dataSource.next(results);
+        },
+        (err) => {
+          this.errorMsg = err;
+          this.alertsService.displayMessage(err);
+        },
+        () => {
+          this.dataSource.next(['completed']);
+        }
+      );
   }
 
   onCreatePortfolioHandler(): void {
@@ -77,15 +99,58 @@ export class LandingPageComponent extends PortfolioSource implements OnInit {
       data: {
         title: 'Create Portfolio',
         createPortfolio: true,
-        actions: 'create',
+        actions: 'Create',
       },
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result === 'cancel' || result.length === 0) return;
-      console.log(result);
-      this.userPortfolio$.pipe(take(1)).subscribe((data) => {
-        this.userPortfolio$.next([...data, result]);
+    let newPortfolio: PortfolioMeta;
+    let userPortfolios: PortfolioMeta[];
+
+    dialogRef
+      .afterClosed()
+      .pipe(
+        switchMap((result) => {
+          if (result === 'cancel' || result.length === 0) return of(null);
+          newPortfolio = result;
+          return this.landingPageService.userPortfolio$.pipe(take(1));
+        }),
+        switchMap((portfolios) => {
+          // If user clicks cancel
+          if (!portfolios) return of(null);
+          this.onCreate = true;
+          userPortfolios = portfolios;
+          newPortfolio['orderId'] = portfolios.length + 1;
+          return this.http.post('http://localhost:4280/daron/create-portfolio', newPortfolio, {
+            withCredentials: true,
+          });
+        }),
+        catchError((err) => this.appService.handleError(err))
+      )
+      .subscribe(
+        (response) => {
+          if (!response) return;
+          this.landingPageService.userPortfolio$.next([...userPortfolios, newPortfolio]);
+          this.snackBar.open('Created new portfolio!', 'Close', {
+            panelClass: 'success-snackbar',
+          });
+        },
+        (err) => {
+          this.snackBar.open(`Error while creating portfolio: ${err}`, 'Close', {
+            panelClass: 'error-snackbar',
+          });
+        }
+      );
+  }
+
+  onDeletePortfolioHandler(event: string) {
+    this.landingPageService.userPortfolio$.pipe(take(1)).subscribe((prevData) => {
+      const index = prevData.findIndex((item) => item.portfolioName === event);
+      prevData.splice(index, 1);
+      this.landingPageService.userPortfolio$.next(prevData);
+      sessionStorage.removeItem(event);
+      this.snackBar.open('Portfolio deleted!', 'Close', {
+        panelClass: 'success-snackbar',
+        duration: 5000,
       });
     });
   }
@@ -120,5 +185,36 @@ export class LandingPageComponent extends PortfolioSource implements OnInit {
     // If search returned no results
     this.isLoading = false;
     this.portfolioTable$.next(event.results);
+  }
+
+  onReorderHandler() {
+    this.onReorder = true;
+  }
+
+  reorderEventHandler(event: string) {
+    switch (event) {
+      case 'COMPLETE':
+        this.onReorder = false;
+        this.snackBar.open('Portfolios reordered!', 'Close', {
+          panelClass: 'success-snackbar',
+          duration: 5000,
+        });
+        break;
+      default:
+        this.onReorder = false;
+    }
+  }
+
+  testErrorHandler() {
+    this.alertsService.displayMessage(`hello world ${this.testNumber}`, {
+      delay: '2s',
+    });
+    this.testNumber += 1;
+  }
+
+  onKeyPressEvent(event: string) {
+    if (event === 'Escape') {
+      this.onReorder = false;
+    }
   }
 }
